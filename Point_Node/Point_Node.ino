@@ -55,6 +55,7 @@ class PointMotor {
   public:
     PointMotor();
     PointMotor(int id, int angleCentre, int angleThrow);
+    int point_exists();
     void setStraight();
     void setTurnout();
     void attach();
@@ -66,13 +67,16 @@ class PointMotor {
     int _node;    
     int _angleCentre;
     int _angleThrow;
-    int _state;  
+    int _state; 
+    int _exists; 
     Servo _servo;
 
     void setServoAngle();
 };
 
-PointMotor::PointMotor() {}
+PointMotor::PointMotor() {
+  _exists = 0;
+}
 
 PointMotor::PointMotor(int id, int angleCentre = 24, int angleThrow = 12) {
   _id = id;
@@ -80,6 +84,11 @@ PointMotor::PointMotor(int id, int angleCentre = 24, int angleThrow = 12) {
   _node = _id & DATA_NODE;
   _angleCentre = angleCentre;
   _angleThrow = angleThrow;
+  _exists = 1;
+}
+
+int PointMotor::point_exists() {
+  return _exists;
 }
 
 void PointMotor::attach() {
@@ -116,7 +125,7 @@ void PointMotor::setServoAngle() {
 
 //---------------------------------------------------------------------------------------------------
 
-PointMotor points[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+PointMotor points[8] = {PointMotor(), PointMotor(), PointMotor(), PointMotor(), PointMotor(), PointMotor(), PointMotor(), PointMotor()};
 
 volatile int i2cCommand;
 volatile int i2cCommandWaiting;
@@ -205,7 +214,7 @@ void processMessage(int msg) {
   int id = msg & DATA_ID;
 
   for (int i = 0; i <= 7; i++) {
-    if (points[i] == NULL) {
+    if (points[i].point_exists() == 1) {
       continue;
     } else {
       if (points[i].getID() == id) {
@@ -215,7 +224,7 @@ void processMessage(int msg) {
           points[i].setTurnout();
         }
         break;
-      } 
-      
+      }      
+    }
   }
 }
