@@ -5,6 +5,7 @@
 const int CODE_VERSION = 1;
 const char CODE_VERSION_DATE[] = "2022-11-06";
 int node_id = 0;
+const int TEST_MODE = 1;
 
 //Constants
 const int DATA_PIN = B0001111;
@@ -187,11 +188,29 @@ void setup() {
   Wire.onReceive(ReceiveEvent);
 
   Serial.println("[Setup] Point Node Started. i2c Address " + String(node_id) + ".");
+
+  if (TEST_MODE == 1) {
+    Serial.println("[Setup] Single servo (pin 3) test mode activated");
+  }
+
+  if (TEST_MODE == 2) {
+    Serial.println("[Setup] All servo test mode activated");
+  }
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   delay(50);
+
+  if (TEST_MODE == 1) {
+    test_single_servo();
+    return;
+  }
+
+  if (TEST_MODE == 2) {
+    test_all_servo();
+    return;
+  }
 
   if (i2cCommandWaiting == 1) {
     processMessage(i2cCommand);
@@ -214,7 +233,7 @@ void processMessage(int msg) {
   int id = msg & DATA_ID;
 
   for (int i = 0; i <= 7; i++) {
-    if (points[i].point_exists() == 1) {
+    if (points[i].point_exists() != 1) {
       continue;
     } else {
       if (points[i].getID() == id) {
@@ -226,5 +245,41 @@ void processMessage(int msg) {
         break;
       }      
     }
+  }
+}
+
+void test_single_servo() {
+  int cmd;
+  
+  //Set point to turnout
+  cmd = DATA_COMMAND + node_id + 3;
+  Serial.println("[SINGLE SERVO TEST] Setting point on pin 3 to turnout. (i2c command: " + String(cmd, BIN) + ")");
+  processMessage(cmd);
+  delay(1000);
+  
+  //Set point to straight
+  cmd = node_id + 3;
+  Serial.println("[SINGLE SERVO TEST] Setting point on pin 3 to straight. (i2c command: " + String(cmd, BIN) + ")");
+  processMessage(cmd);
+  delay(1000); 
+}
+
+void test_all_servo() {
+  int cmd;
+
+  //Set all points to turnout one at a time
+  for (int i = 0; i <= 7; i++) {
+      cmd = DATA_COMMAND + node_id + i + 3;
+      Serial.println("[ALL SERVO TEST] Setting point on pin " + String(i + 3) + " to turnout. (i2c command: " + String(cmd, BIN) + ")");
+      processMessage(cmd);
+      delay(200);
+  }
+
+  //Set all points to straight one at a time
+  for (int i = 0; i <= 7; i++) {
+      cmd = node_id + i + 3;
+      Serial.println("[ALL SERVO TEST] Setting point on pin " + String(i + 3) + " to straight. (i2c command: " + String(cmd, BIN) + ")");
+      processMessage(cmd);
+      delay(200);
   }
 }
