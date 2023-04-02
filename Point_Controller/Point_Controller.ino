@@ -280,7 +280,7 @@ void setup() {
   Serial.println("[setup] Point Controler, Code Date: " + String(CODE_VERSION_DATE));
 
   //Initiate I2C
-  Wire.begin();
+  Wire.begin(1);
 
   //Initiate Shift Register Control
   shiftRegister.init();
