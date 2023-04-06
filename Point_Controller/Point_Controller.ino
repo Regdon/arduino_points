@@ -122,6 +122,7 @@ void Point::setState(int state) {
 int Point::checkTrigger(int analogValue) {
 
   if (abs(_triggerAnalog - analogValue) < 20) {
+    Serial.println("[Point->checkTrigger] Trigger detected on for Point ID " + String(_id, BIN));
     toggleState();    
     return 1;
   }
@@ -161,6 +162,7 @@ class ShiftRegister {
     void transmit();
     void setBit(int pos, int value);
     void init();
+    void setPWM();
     
   private:
     int _SER_IN;
@@ -182,8 +184,10 @@ void ShiftRegister::transmit() {
   long dataBuffer = _data;
   int state = 0;
 
+  Serial.println("[ShiftRegister->transmit] Outputting to Shift Registers " + String(_data, BIN));
+
   //Send bits to Shift Register
-  for (int i = 0; i < 8; i ++) {
+  for (int i = 0; i < 32; i ++) {
     state = dataBuffer & 1;
 
     if (state == 1) {
@@ -226,12 +230,18 @@ void ShiftRegister::init() {
   pinMode(_SER_IN, OUTPUT);
   pinMode(_SRCK, OUTPUT);
   pinMode(_RCK, OUTPUT);
-  pinMode(_G, OUTPUT);
+  //pinMode(_G, OUTPUT);
 
   digitalWrite(_SER_IN, LOW);
   digitalWrite(_SRCK, LOW);
   digitalWrite(_RCK, LOW);
-  digitalWrite(_G, LOW);  
+  //digitalWrite(_G, LOW);  
+}
+
+void ShiftRegister::setPWM() {
+  int value = analogRead(PIN_PWM_LISTEN);
+  analogWrite(_G, value / 4);
+  Serial.println("[ShiftRegister->setBit] LED PWM Output: " + String(value / 4) + "/255");
 }
 
 
@@ -268,8 +278,7 @@ Point points[20] = {
   Point(12, POINT_YARD_INNER_LEFT_1, STATE_STRAIGHT),
   Point(13, POINT_YARD_OUTER_LEFT_1, STATE_STRAIGHT),
   Point(14, POINT_YARD_INNER_LEFT_2, STATE_STRAIGHT),
-  Point(15, POINT_YARD_OUTER_LEFT_2, STATE_TURNOUT)
-    
+  Point(15, POINT_YARD_OUTER_LEFT_2, STATE_TURNOUT)    
 };
 
 void setup() {
@@ -287,14 +296,19 @@ void setup() {
 
   delay(500);
 
+  //Detect LED PWM
+  shiftRegister.setPWM();
+  
   //Setup Points
-  for (int i = 0; i <= 5; i++) {
+  for (int i = 0; i < 20; i++) {
     points[i].setDefault();
     updateShift(points[i].getShiftPosition(), points[i].getState());
     delay(250);
   } 
-
+  
   updateOutput = 1;
+
+  Serial.println("[setup] Complete");
 }
 
 void loop() {
@@ -317,23 +331,21 @@ void analogListen() {
     return;
   }
 
-//  if (resistTestMode == 1) {
-//    Serial.println("analogRead Value = " + String(value));
-//    return;
-//  }
-
   if (inputProcessed == 1) {
     return;
   }
 
-  for (int i = 0; i <= 5; i++) {
+  for (int i = 0; i < 20; i++) {
     if (points[i].checkTrigger(value) == 1) {
       updateShift(points[i].getShiftPosition(), points[i].getState());
       inputProcessed = 1;
       updateOutput = 1;     
       return;
     }
-  }  
+  }
+  
+  Serial.println("[analogListen] Unknown Voltage Divider Output: " + String(value));
+    
 }
 
 void updateShift(int shiftPosition, int state) {
