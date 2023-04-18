@@ -1,8 +1,19 @@
 #include <Wire.h>
 
 //Settings
-const int CODE_VERSION = 1;
-const char CODE_VERSION_DATE[] = "2022-11-26";
+const int CODE_VERSION = 2;
+const char CODE_VERSION_DATE[] = "2023-04-10";
+
+//Resistance Values
+const int RESISTANCES[16] = {
+  1024, 938, 868, 806, 752, 706, 665, 628, 595, 565, 535, 514, 490, 470, 452, 435
+};
+
+//Shift Register Positions
+//Some are revesed to fix a hardware bug on the circuit board
+const int SHIFT_POSITIONS[16] = {
+  31, 29, 25, 27, 23, 21, 17, 19, 15, 13, 9, 11, 7, 5, 1, 3
+};
 
 //Constants
 const int DATA_NODE = B0110000;
@@ -58,7 +69,7 @@ void i2cSend(int toID, int command) {
   Wire.write(command);
   Wire.endTransmission();
 
-  Serial.println("[i2cSend] I2C command " + String(command) + " sent to I2C ID " + String(toID));
+  Serial.println("[i2cSend] I2C command " + String(command, BIN) + " sent to I2C ID " + String(toID, BIN));
 
 }
 
@@ -99,8 +110,8 @@ Point::Point(int pointNumber, int id, int defaultState) {
   _id = id;
   _defaultState = defaultState;
   
-  _shiftPosition = _pointNumber * 2;
-  _triggerAnalog = 1024 - (64 * _pointNumber);
+  _shiftPosition = SHIFT_POSITIONS[_pointNumber];
+  _triggerAnalog = RESISTANCES[_pointNumber];
 }
 
 void Point::setDefault() {
@@ -121,7 +132,7 @@ void Point::setState(int state) {
 
 int Point::checkTrigger(int analogValue) {
 
-  if (abs(_triggerAnalog - analogValue) < 20) {
+  if (abs(_triggerAnalog - analogValue) < 10) {
     Serial.println("[Point->checkTrigger] Trigger detected on for Point ID " + String(_id, BIN));
     toggleState();    
     return 1;
@@ -160,7 +171,7 @@ class ShiftRegister {
   public:
     ShiftRegister(int SER_IN, int SRCK, int RCK, int G);
     void transmit();
-    void setBit(int pos, int value);
+    void setBit(long pos, long value);
     void init();
     void setPWM();
     
@@ -212,18 +223,22 @@ void ShiftRegister::transmit() {
   digitalWrite(_RCK, LOW);     
 }
 
-void ShiftRegister::setBit(int pos, int value) {
+void ShiftRegister::setBit(long pos, long value) {
   long mask;
-      
+
+  long bitpos;
+
+  bitpos = pos - 1;
+  
   if (value == 0) {
-    mask = ~(1 << pos);
+    mask = ~(1L << bitpos);
     _data &= mask;
   } else {
-    mask = 1 << pos;
+    mask = 1L << bitpos;
     _data |= mask;
   }
 
-  Serial.println("[ShiftRegister->setBit] Shift Register setting bit " + String(pos) + " to " + String(value) + " result " + String(_data, BIN));
+  Serial.println("[ShiftRegister->setBit] Shift Register setting bit " + String(pos) + " to " + String(value) + " result " + String(_data, BIN) + " mask: " + String(mask, BIN));
 }
 
 void ShiftRegister::init() {
@@ -235,7 +250,7 @@ void ShiftRegister::init() {
   digitalWrite(_SER_IN, LOW);
   digitalWrite(_SRCK, LOW);
   digitalWrite(_RCK, LOW);
-  //digitalWrite(_G, LOW);  
+  //digitalWrite(_G, LOW);    
 }
 
 void ShiftRegister::setPWM() {
@@ -293,6 +308,7 @@ void setup() {
 
   //Initiate Shift Register Control
   shiftRegister.init();
+  shiftRegister.transmit();
 
   delay(500);
 
@@ -303,7 +319,7 @@ void setup() {
   for (int i = 0; i < 20; i++) {
     points[i].setDefault();
     updateShift(points[i].getShiftPosition(), points[i].getState());
-    delay(250);
+    delay(100);
   } 
   
   updateOutput = 1;
@@ -319,8 +335,9 @@ void loop() {
     shiftRegister.transmit();
     updateOutput = 0;
   }
-  
+
   delay(50);
+  //shiftRegister.setPWM();
 }
 
 void analogListen() {

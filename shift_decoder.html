@@ -1,0 +1,22 @@
+<head>
+    <script>
+        function decodeShift() {
+            var input = document.getElementById("input").value; 
+            if (input.length < 32) {
+                output = input.padStart(32 - input.length, "0");
+            }
+            
+
+            document.getElementById("output").innerHTML = output;
+        }
+    </script>
+</head>
+
+<body>
+
+<form>
+    <input type="text" id = "input"> <button type = "button" onclick="decodeShift()">Decode</button>
+</form>
+<div id = "output"></div>
+
+</body>
