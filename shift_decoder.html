@@ -3,16 +3,47 @@
         function decodeShift() {
             var input = document.getElementById("input").value; 
             if (input.length < 32) {
-                output = input.padStart(32 - input.length, "0");
+                input = input.padStart(32, "0");
             }
-            
 
-            document.getElementById("output").innerHTML = output;
+            document.getElementById("output").innerHTML = "";
+            document.getElementById("output").innerHTML += "<h2>Output</h2>";
+            document.getElementById("output").innerHTML += "<p>Input: " + input + "</p>";
+            
+            for (let index = 0; index < 16; index++) {
+                var state = "Undefined";
+                var chars = input.substring(index * 2, index *2 + 2);
+                switch (chars) {
+                    case "00":
+                        state = "Undefined";
+                        break;
+                    case "01":
+                        state = "Straight";
+                        break;
+                    case "10":
+                        state = "Turnout";
+                        break;
+                    case "11":
+                        state = "Undefined";
+                        break;
+                    default:
+                        break;
+                }
+                if (chars == "01") {
+                    state = "Turnout";
+                }
+                document.getElementById("output").innerHTML += "<p>Point " + index + " : " + state + "</p>";
+            }
+
+            //document.getElementById("output").innerHTML = input;
         }
     </script>
 </head>
 
 <body>
+
+    <h1>Shift Register Decoder</h1>
+    <p>Enter the shift register command into the text box and click the button to see the state of each of the points.</p>
 
 <form>
     <input type="text" id = "input"> <button type = "button" onclick="decodeShift()">Decode</button>
