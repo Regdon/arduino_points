@@ -1,0 +1,165 @@
+<head>
+<style>
+    div.flex {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    div.flexcont {
+        flex: 50%;
+    }
+    @media (max-width: 1200px) {
+        div.flexcont {
+            flex: 100%;
+        }
+    }
+    table {
+        border: solid 1px;
+        border-collapse: collapse;
+    }
+    td, th {
+        border:  solid 1px;
+        text-align: left;
+        padding: 5px;
+    }
+    p {
+        display: block;
+    }
+</style>
+</head>
+
+<body>
+    <h1>Point Node Information</h1>
+    <div class="flex">
+        <div class="flexcont">
+            <table>
+                <tr>
+                    <th>Point</th>
+                    <th>Wire Type</th>
+                    <th>Node ID</th>
+                    <th>Point ID</th>
+                    <th>Point Name</th>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>Long</td>
+                    <td>00</td>
+                    <td>0010</td>
+                    <td>YARD_INNER_LEFT_1</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Long</td>
+                    <td>00</td>
+                    <td>0011</td>
+                    <td>YARD_INNER_LEFT_2</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Medium</td>
+                    <td>00</td>
+                    <td>0100</td>
+                    <td>YARD_OUTER_LEFT_1</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Short</td>
+                    <td>00</td>
+                    <td>0101</td>
+                    <td>YARD_OUTER_LEFT_2</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Double</td>
+                    <td>01</td>
+                    <td>0010<br>0011</td>
+                    <td>YARD_CENTER_CROSSOVER_OUT_1<BR>YARD_CENTER_CROSSOVER_OUT_2</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Double</td>
+                    <td>01</td>
+                    <td>0100<br>0101</td>
+                    <td>YARD_CENTER_CROSSOVER_IN_1<BR>YARD_CENTER_CROSSOVER_IN_2</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Medium</td>
+                    <td>01</td>
+                    <td>0110</td>
+                    <td>YARD_CENTER_IN</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>Short</td>
+                    <td>01</td>
+                    <td>0111</td>
+                    <td>YARD_CENTER_OUT</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>Medium</td>
+                    <td>10</td>
+                    <td>0010</td>
+                    <td>YARD_INNER_RIGHT_1</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>Medium</td>
+                    <td>10</td>
+                    <td>0011</td>
+                    <td>YARD_INNER_RIGHT_2</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>Short</td>
+                    <td>10</td>
+                    <td>0100</td>
+                    <td>YARD_OUTER_RIGHT_1</td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td>Short</td>
+                    <td>10</td>
+                    <td>0101</td>
+                    <td>YARD_OUTER_RIGHT_2</td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>Double</td>
+                    <td>11</td>
+                    <td>0010<br>0011</td>
+                    <td>FRONT_PLATFORM_CROSSOVER_1<br>FRONT_PLATFORM_CROSSOVER_2</td>
+                </tr>
+                <tr>
+                    <td>13</td>
+                    <td>Long</td>
+                    <td>11</td>
+                    <td>0100</td>
+                    <td>FRONT_PLATFORM_TURNOUT</td>
+                </tr>
+                <tr>
+                    <td>14</td>
+                    <td>Double</td>
+                    <td>11</td>
+                    <td>0101<br>0110</td>
+                    <td>FRONT_TRAILING_CROSSOVER_1<br>FRONT_TRAILING_CROSSOVER_2</td>
+                </tr>
+                <tr>
+                    <td>15</td>
+                    <td>Long</td>
+                    <td>11</td>
+                    <td>0111</td>
+                    <td>FRONT_BAY_PLATFORM</td>
+                </tr>
+            </table>
+        </div>
+        <div class="flexcont">
+            <p><b>Point</b>: The ID of the point in the point_controller</p>
+            <p><b>Wire Type</b>: The length and type of wire for the control panel. Short = 10cm, Medium = 15cm, Long = 20cm, Double = 15cm with an extra LED</p>
+            <p><b>Node ID</b>: Two digit binary for the i2c address of the point node for that point</p>
+            <p><b>Point ID</b>: Four digit binary for the pin the individual point is wired to</p>
+            <p><b>Point Name</b>: The name used within the code as a constant identifer for a point</p>
+        </div>
+    </div>   
+</body>
