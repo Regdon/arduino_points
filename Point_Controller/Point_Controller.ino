@@ -1,8 +1,19 @@
 #include <Wire.h>
 
 //Settings
-const int CODE_VERSION = 1;
-const char CODE_VERSION_DATE[] = "2022-11-26";
+const int CODE_VERSION = 2;
+const char CODE_VERSION_DATE[] = "2023-04-10";
+
+//Resistance Values
+const int RESISTANCES[16] = {
+  1024, 938, 868, 806, 752, 706, 665, 628, 595, 565, 535, 514, 490, 470, 452, 435
+};
+
+//Shift Register Positions
+//Some are revesed to fix a hardware bug on the circuit board
+const int SHIFT_POSITIONS[16] = {
+  31, 29, 25, 27, 23, 21, 17, 19, 15, 13, 9, 11, 7, 5, 1, 3
+};
 
 //Constants
 const int DATA_NODE = B0110000;
@@ -58,7 +69,7 @@ void i2cSend(int toID, int command) {
   Wire.write(command);
   Wire.endTransmission();
 
-  Serial.println("[i2cSend] I2C command " + String(command) + " sent to I2C ID " + String(toID));
+  Serial.println("[i2cSend] I2C command " + String(command, BIN) + " sent to I2C ID " + String(toID, BIN));
 
 }
 
@@ -99,8 +110,8 @@ Point::Point(int pointNumber, int id, int defaultState) {
   _id = id;
   _defaultState = defaultState;
   
-  _shiftPosition = _pointNumber * 2;
-  _triggerAnalog = 1024 - (64 * _pointNumber);
+  _shiftPosition = SHIFT_POSITIONS[_pointNumber];
+  _triggerAnalog = RESISTANCES[_pointNumber];
 }
 
 void Point::setDefault() {
@@ -121,7 +132,8 @@ void Point::setState(int state) {
 
 int Point::checkTrigger(int analogValue) {
 
-  if (abs(_triggerAnalog - analogValue) < 20) {
+  if (abs(_triggerAnalog - analogValue) < 10) {
+    Serial.println("[Point->checkTrigger] Trigger detected on for Point ID " + String(_id, BIN));
     toggleState();    
     return 1;
   }
@@ -159,8 +171,9 @@ class ShiftRegister {
   public:
     ShiftRegister(int SER_IN, int SRCK, int RCK, int G);
     void transmit();
-    void setBit(int pos, int value);
+    void setBit(long pos, long value);
     void init();
+    void setPWM();
     
   private:
     int _SER_IN;
@@ -182,8 +195,10 @@ void ShiftRegister::transmit() {
   long dataBuffer = _data;
   int state = 0;
 
+  Serial.println("[ShiftRegister->transmit] Outputting to Shift Registers " + String(_data, BIN));
+
   //Send bits to Shift Register
-  for (int i = 0; i < 8; i ++) {
+  for (int i = 0; i < 32; i ++) {
     state = dataBuffer & 1;
 
     if (state == 1) {
@@ -208,30 +223,40 @@ void ShiftRegister::transmit() {
   digitalWrite(_RCK, LOW);     
 }
 
-void ShiftRegister::setBit(int pos, int value) {
+void ShiftRegister::setBit(long pos, long value) {
   long mask;
-      
+
+  long bitpos;
+
+  bitpos = pos - 1;
+  
   if (value == 0) {
-    mask = ~(1 << pos);
+    mask = ~(1L << bitpos);
     _data &= mask;
   } else {
-    mask = 1 << pos;
+    mask = 1L << bitpos;
     _data |= mask;
   }
 
-  Serial.println("[ShiftRegister->setBit] Shift Register setting bit " + String(pos) + " to " + String(value) + " result " + String(_data, BIN));
+  Serial.println("[ShiftRegister->setBit] Shift Register setting bit " + String(pos) + " to " + String(value) + " result " + String(_data, BIN) + " mask: " + String(mask, BIN));
 }
 
 void ShiftRegister::init() {
   pinMode(_SER_IN, OUTPUT);
   pinMode(_SRCK, OUTPUT);
   pinMode(_RCK, OUTPUT);
-  pinMode(_G, OUTPUT);
+  //pinMode(_G, OUTPUT);
 
   digitalWrite(_SER_IN, LOW);
   digitalWrite(_SRCK, LOW);
   digitalWrite(_RCK, LOW);
-  digitalWrite(_G, LOW);  
+  //digitalWrite(_G, LOW);    
+}
+
+void ShiftRegister::setPWM() {
+  int value = analogRead(PIN_PWM_LISTEN);
+  analogWrite(_G, value / 4);
+  Serial.println("[ShiftRegister->setBit] LED PWM Output: " + String(value / 4) + "/255");
 }
 
 
@@ -268,8 +293,7 @@ Point points[20] = {
   Point(12, POINT_YARD_INNER_LEFT_1, STATE_STRAIGHT),
   Point(13, POINT_YARD_OUTER_LEFT_1, STATE_STRAIGHT),
   Point(14, POINT_YARD_INNER_LEFT_2, STATE_STRAIGHT),
-  Point(15, POINT_YARD_OUTER_LEFT_2, STATE_TURNOUT)
-    
+  Point(15, POINT_YARD_OUTER_LEFT_2, STATE_TURNOUT)    
 };
 
 void setup() {
@@ -284,17 +308,23 @@ void setup() {
 
   //Initiate Shift Register Control
   shiftRegister.init();
+  shiftRegister.transmit();
 
   delay(500);
 
+  //Detect LED PWM
+  shiftRegister.setPWM();
+  
   //Setup Points
-  for (int i = 0; i <= 5; i++) {
+  for (int i = 0; i < 20; i++) {
     points[i].setDefault();
     updateShift(points[i].getShiftPosition(), points[i].getState());
-    delay(250);
+    delay(100);
   } 
-
+  
   updateOutput = 1;
+
+  Serial.println("[setup] Complete");
 }
 
 void loop() {
@@ -305,8 +335,9 @@ void loop() {
     shiftRegister.transmit();
     updateOutput = 0;
   }
-  
+
   delay(50);
+  //shiftRegister.setPWM();
 }
 
 void analogListen() {
@@ -317,23 +348,21 @@ void analogListen() {
     return;
   }
 
-//  if (resistTestMode == 1) {
-//    Serial.println("analogRead Value = " + String(value));
-//    return;
-//  }
-
   if (inputProcessed == 1) {
     return;
   }
 
-  for (int i = 0; i <= 5; i++) {
+  for (int i = 0; i < 20; i++) {
     if (points[i].checkTrigger(value) == 1) {
       updateShift(points[i].getShiftPosition(), points[i].getState());
       inputProcessed = 1;
       updateOutput = 1;     
       return;
     }
-  }  
+  }
+  
+  Serial.println("[analogListen] Unknown Voltage Divider Output: " + String(value));
+    
 }
 
 void updateShift(int shiftPosition, int state) {
