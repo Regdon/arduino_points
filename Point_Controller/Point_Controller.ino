@@ -1,8 +1,8 @@
 #include <Wire.h>
 
 //Settings
-const int CODE_VERSION = 2;
-const char CODE_VERSION_DATE[] = "2023-04-10";
+const int CODE_VERSION = 3;
+const char CODE_VERSION_DATE[] = "2023-06-11";
 
 //Resistance Values
 const int RESISTANCES[16] = {
