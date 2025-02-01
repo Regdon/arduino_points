@@ -216,7 +216,12 @@ void loop() {
 
 void ReceiveEvent(int howMany) {
   int command = 0;
-  command = command + Wire.read();
+  while (Wire.available()) {
+      char c = Wire.read();
+      command += int(c);
+      //Serial.println(int(c));
+  }  
+  //command = command + Wire.read();
   Serial.println("[RECEIVE_EVENT] i2c command received " + String(command, BIN) + ", variable howMany = " + String(howMany));
   i2cCommand = command;
   i2cCommandWaiting = 1;
