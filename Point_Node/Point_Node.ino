@@ -2,8 +2,8 @@
 #include <Servo.h>
 
 //Settings
-const int CODE_VERSION = 2;
-const char CODE_VERSION_DATE[] = "2023-06-11";
+const int CODE_VERSION = 3;
+const char CODE_VERSION_DATE[] = "2025-03-23";
 int node_id = 0;
 const int TEST_MODE = 0;
 
@@ -87,6 +87,7 @@ PointMotor::PointMotor(int id, int angleCentre = 24, int angleThrow = 12) {
   _angleCentre = angleCentre;
   _angleThrow = angleThrow;
   _exists = 1;
+  Serial.println("[POINT_MOTOR_CREATE] Created Point Motor ID " + String(id));
 }
 
 int PointMotor::point_exists() {
@@ -155,19 +156,19 @@ void setup() {
       break;
       
     case B010000:
-      points[0] = PointMotor(POINT_YARD_INNER_RIGHT_1, 24, 12);
-      points[1] = PointMotor(POINT_YARD_OUTER_RIGHT_1, 24, 12);
-      points[2] = PointMotor(POINT_YARD_INNER_RIGHT_2, 24, 12);
-      points[3] = PointMotor(POINT_YARD_OUTER_RIGHT_2, 24, 12);
-      break;
-      
-    case B100000:
       points[0] = PointMotor(POINT_YARD_CENTER_IN, 24, 12);
       points[1] = PointMotor(POINT_YARD_CENTER_OUT, 24, 12);
       points[2] = PointMotor(POINT_YARD_CENTER_IN_CROSSOVER_1, 24, 12);
       points[3] = PointMotor(POINT_YARD_CENTER_IN_CROSSOVER_2, 24, 12);
       points[4] = PointMotor(POINT_YARD_CENTER_OUT_CROSSOVER_1, 24, 12);
       points[5] = PointMotor(POINT_YARD_CENTER_OUT_CROSSOVER_2, 24, 12);
+      break;
+      
+    case B100000:
+      points[0] = PointMotor(POINT_YARD_INNER_RIGHT_1, 24, 12);
+      points[1] = PointMotor(POINT_YARD_OUTER_RIGHT_1, 24, 12);
+      points[2] = PointMotor(POINT_YARD_INNER_RIGHT_2, 24, 12);
+      points[3] = PointMotor(POINT_YARD_OUTER_RIGHT_2, 24, 12);
       break;
       
     case B110000:    
