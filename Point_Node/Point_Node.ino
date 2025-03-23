@@ -2,7 +2,7 @@
 #include <Servo.h>
 
 //Settings
-const int CODE_VERSION = 3;
+const int CODE_VERSION = 4;
 const char CODE_VERSION_DATE[] = "2025-03-23";
 int node_id = 0;
 const int TEST_MODE = 0;
@@ -16,6 +16,8 @@ const int DATA_ID = B0111111;
 const int STATE_STRAIGHT = -1;
 const int STATE_UNKNOWN = 0;
 const int STATE_TURNOUT = 1;
+
+const int I2C_MAX_COMMANDS = 10;
 
 //Switch Pins
 const int PIN_SWITCH_1 = 10;
@@ -124,8 +126,10 @@ void PointMotor::setServoAngle() {
 
 PointMotor points[8] = {PointMotor(), PointMotor(), PointMotor(), PointMotor(), PointMotor(), PointMotor(), PointMotor(), PointMotor()};
 
-volatile int i2cCommand;
-volatile int i2cCommandWaiting;
+volatile int i2cCommand[10];
+int i2cCommandSetNext;
+int i2cCommandReadNext;
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -208,9 +212,13 @@ void loop() {
     return;
   }
 
-  if (i2cCommandWaiting == 1) {
-    processMessage(i2cCommand);
-    i2cCommandWaiting = 0;
+  if (i2cCommand[i2cCommandReadNext] != 0) {
+    processMessage(i2cCommand[i2cCommandReadNext]);
+    i2cCommand[i2cCommandReadNext] = 0;
+    i2cCommandReadNext ++;
+    if (i2cCommandReadNext == I2C_MAX_COMMANDS) {
+      i2cCommandReadNext = 0;
+    }
   }
   
 }
@@ -224,8 +232,12 @@ void ReceiveEvent(int howMany) {
   }  
   //command = command + Wire.read();
   Serial.println("[RECEIVE_EVENT] i2c command received " + String(command, BIN) + ", variable howMany = " + String(howMany));
-  i2cCommand = command;
-  i2cCommandWaiting = 1;
+
+  i2cCommand[i2cCommandSetNext] = command;
+  i2cCommandSetNext ++;
+  if (i2cCommandSetNext == I2C_MAX_COMMANDS) {
+    i2cCommandSetNext = 0;
+  }
 }
 
 void processMessage(int msg) {
