@@ -2,8 +2,8 @@
 #include <Servo.h>
 
 //Settings
-const int CODE_VERSION = 4;
-const char CODE_VERSION_DATE[] = "2025-03-23";
+const int CODE_VERSION = 5;
+const char CODE_VERSION_DATE[] = "2025-04-05";
 int node_id = 0;
 const int TEST_MODE = 0;
 
@@ -30,12 +30,12 @@ const int POINT_YARD_OUTER_LEFT_1 = B000100;
 const int POINT_YARD_OUTER_LEFT_2 = B000101;
 
 //Point Motor References - Node 01
-const int POINT_YARD_CENTER_OUT_CROSSOVER_1 = B010010;
-const int POINT_YARD_CENTER_OUT_CROSSOVER_2 = B010011;
-const int POINT_YARD_CENTER_IN_CROSSOVER_1 = B010100;
-const int POINT_YARD_CENTER_IN_CROSSOVER_2 = B010101;
-const int POINT_YARD_CENTER_IN = B010110;
-const int POINT_YARD_CENTER_OUT = B010111;
+const int POINT_YORK_INNER_LOOP = B010010;
+const int POINT_YORK_CROSSOVER_FACING_A = B010011;
+const int POINT_YORK_CROSSOVER_FACING_B = B010100;
+const int POINT_YORK_CROSSOVER_TRAILING_A = B010101;
+const int POINT_YORK_CROSSOVER_TRAILING_B = B010110;
+const int POINT_YORK_OUTER_LOOP = B010111;
 
 //Point Motor References - Node 10
 const int POINT_YARD_INNER_RIGHT_1 = B100010;
@@ -60,7 +60,7 @@ Servo _servo;
 class PointMotor {
   public:
     PointMotor();
-    PointMotor(int id, int angleCentre, int angleThrow);
+    PointMotor(int id, int angleCentre, int angleThrow, int reverse);
     int point_exists();
     void setStraight();
     void setTurnout();
@@ -73,7 +73,8 @@ class PointMotor {
     int _angleCentre;
     int _angleThrow;
     int _state; 
-    int _exists; 
+    int _exists;
+    int _reverse; 
 
     void setServoAngle();
 };
@@ -82,13 +83,14 @@ PointMotor::PointMotor() {
   _exists = 0;
 }
 
-PointMotor::PointMotor(int id, int angleCentre = 24, int angleThrow = 12) {
+PointMotor::PointMotor(int id, int angleCentre = 24, int angleThrow = 12, int reverse = 1) {
   _id = id;
   _pin = _id & DATA_PIN;
   _node = _id & DATA_NODE;
   _angleCentre = angleCentre;
   _angleThrow = angleThrow;
   _exists = 1;
+  _reverse = reverse;
   Serial.println("[POINT_MOTOR_CREATE] Created Point Motor ID " + String(id));
 }
 
@@ -116,8 +118,8 @@ int PointMotor::getID() {
 
 void PointMotor::setServoAngle() {
   _servo.attach(_pin);
-  _servo.write(_state * _angleThrow + _angleCentre);
-  Serial.println("[SET_SERVO_ANGLE] Pin " + String(_pin) + " set to " + String(_state * _angleThrow + _angleCentre));
+  _servo.write(_state * _reverse * _angleThrow + _angleCentre);
+  Serial.println("[SET_SERVO_ANGLE] Pin " + String(_pin) + " set to " + String(_state * _reverse * _angleThrow + _angleCentre));
   delay(200);
   _servo.detach();
 }
@@ -158,14 +160,15 @@ void setup() {
       points[4] = PointMotor(POINT_FRONT_OUTER_TRAILING_CROSSOVER, 24, 12);
       points[5] = PointMotor(POINT_FRONT_INNER_TRAILING_CROSSOVER, 24, 12);
       break;
-      
+
+    //Left hand board. York end points
     case B010000:
-      points[0] = PointMotor(POINT_YARD_CENTER_IN, 24, 12);
-      points[1] = PointMotor(POINT_YARD_CENTER_OUT, 24, 12);
-      points[2] = PointMotor(POINT_YARD_CENTER_IN_CROSSOVER_1, 24, 12);
-      points[3] = PointMotor(POINT_YARD_CENTER_IN_CROSSOVER_2, 24, 12);
-      points[4] = PointMotor(POINT_YARD_CENTER_OUT_CROSSOVER_1, 24, 12);
-      points[5] = PointMotor(POINT_YARD_CENTER_OUT_CROSSOVER_2, 24, 12);
+      points[0] = PointMotor(POINT_YORK_INNER_LOOP, 24, 12); //0010 -- 2
+      points[1] = PointMotor(POINT_YORK_CROSSOVER_FACING_A, 24, 12, -1); //0011 -- 3 -- Reversed
+      points[2] = PointMotor(POINT_YORK_CROSSOVER_FACING_B, 24, 12); //0100 -- 4
+      points[3] = PointMotor(POINT_YORK_CROSSOVER_TRAILING_A, 24, 12); //0101 -- 5
+      points[4] = PointMotor(POINT_YORK_CROSSOVER_TRAILING_B, 24, 12); //0110 -- 6
+      points[5] = PointMotor(POINT_YORK_OUTER_LOOP, 24, 12, -1); //0111 -- 7 -- Reversed
       break;
       
     case B100000:
