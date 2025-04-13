@@ -167,7 +167,7 @@ void setup() {
       points[1] = PointMotor(POINT_YORK_CROSSOVER_FACING_A, 24, 12, -1); //0011 -- 3 -- Reversed
       points[2] = PointMotor(POINT_YORK_CROSSOVER_FACING_B, 24, 12); //0100 -- 4
       points[3] = PointMotor(POINT_YORK_CROSSOVER_TRAILING_A, 24, 12); //0101 -- 5
-      points[4] = PointMotor(POINT_YORK_CROSSOVER_TRAILING_B, 24, 12); //0110 -- 6
+      points[4] = PointMotor(POINT_YORK_CROSSOVER_TRAILING_B, 24, 12, -1); //0110 -- 6 -- Reversed
       points[5] = PointMotor(POINT_YORK_OUTER_LOOP, 24, 12, -1); //0111 -- 7 -- Reversed
       break;
       
