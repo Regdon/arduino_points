@@ -2,8 +2,8 @@
 #include <Servo.h>
 
 //Settings
-const int CODE_VERSION = 5;
-const char CODE_VERSION_DATE[] = "2025-04-05";
+const int CODE_VERSION = 6;
+const char CODE_VERSION_DATE[] = "2025-04-13";
 int node_id = 0;
 const int TEST_MODE = 0;
 
