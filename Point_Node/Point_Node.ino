@@ -2,8 +2,8 @@
 #include <Servo.h>
 
 //Settings
-const int CODE_VERSION = 6;
-const char CODE_VERSION_DATE[] = "2025-04-13";
+const int CODE_VERSION = 7;
+const char CODE_VERSION_DATE[] = "2025-04-23";
 int node_id = 0;
 const int TEST_MODE = 0;
 
@@ -24,10 +24,12 @@ const int PIN_SWITCH_1 = 10;
 const int PIN_SWITCH_2 = 11;
 
 //Point Motor References - Node 00
-const int POINT_YARD_INNER_LEFT_1 = B000010;
-const int POINT_YARD_INNER_LEFT_2 = B000011;
-const int POINT_YARD_OUTER_LEFT_1 = B000100;
-const int POINT_YARD_OUTER_LEFT_2 = B000101;
+const int LEEDS_OUTER_LOOP_POINTS = B000010;
+const int LEEDS_FACING_CROSSOVER_INNER_POINT = B000011;
+const int LEEDS_FACING_CROSSOVER_OUTER_POINT = B000100;
+const int LEEDS_TRAILING_CROSSOVER_OUTER_POINT = B000101;
+const int LEEDS_TRAILING_CROSSOVER_INNER_POINT = B000110;
+const int LEEDS_INNER_LOOP_POINTS = B000111;
 
 //Point Motor References - Node 01
 const int POINT_YORK_INNER_LOOP = B010010;
@@ -38,10 +40,11 @@ const int POINT_YORK_CROSSOVER_TRAILING_B = B010110;
 const int POINT_YORK_OUTER_LOOP = B010111;
 
 //Point Motor References - Node 10
-const int POINT_YARD_INNER_RIGHT_1 = B100010;
-const int POINT_YARD_INNER_RIGHT_2 = B100011;
-const int POINT_YARD_OUTER_RIGHT_1 = B100100;
-const int POINT_YARD_OUTER_RIGHT_2 = B100101;
+const int YORK_SIDING = B100010;
+const int VIADUCT_CROSSOVEER_YORK = B100011;
+const int VIADUCT_CROSSOVER_LEEDS = B100100;
+const int LEEDS_SIDING_POINTS_B = B100101;
+const int LEEDS_SIDING_POINTS_C = B100110;
 
 //Point Motor References - Node 11
 const int POINT_FRONT_INNER_MAIN_CROSSOVER = B110010;
@@ -153,12 +156,13 @@ void setup() {
 
   switch (node_id) {
     case B000000:
-      points[0] = PointMotor(POINT_FRONT_INNER_MAIN_CROSSOVER, 24, 12);
-      points[1] = PointMotor(POINT_FRONT_OUTER_MAIN_CROSSOVER, 24, 12);
-      points[2] = PointMotor(POINT_FRONT_INNER_TURNOUT, 24, 12);
-      points[3] = PointMotor(POINT_FRONT_BAY_PLATFORM, 24, 12);
-      points[4] = PointMotor(POINT_FRONT_OUTER_TRAILING_CROSSOVER, 24, 12);
-      points[5] = PointMotor(POINT_FRONT_INNER_TRAILING_CROSSOVER, 24, 12);
+    //Right hand board. Leeds end points
+      points[0] = PointMotor(LEEDS_OUTER_LOOP_POINTS, 24, 12); //0010 -- 2
+      points[1] = PointMotor(LEEDS_FACING_CROSSOVER_INNER_POINT, 24, 12); //0011 -- 3
+      points[2] = PointMotor(LEEDS_FACING_CROSSOVER_OUTER_POINT, 24, 12); //0100 -- 4
+      points[3] = PointMotor(LEEDS_TRAILING_CROSSOVER_OUTER_POINT, 24, 12); //0101 -- 5
+      points[4] = PointMotor(LEEDS_TRAILING_CROSSOVER_INNER_POINT, 24, 12); //0110 -- 6
+      points[5] = PointMotor(LEEDS_INNER_LOOP_POINTS, 24, 12); //0111 -- 7
       break;
 
     //Left hand board. York end points
@@ -172,17 +176,20 @@ void setup() {
       break;
       
     case B100000:
-      points[0] = PointMotor(POINT_YARD_INNER_RIGHT_1, 24, 12);
-      points[1] = PointMotor(POINT_YARD_OUTER_RIGHT_1, 24, 12);
-      points[2] = PointMotor(POINT_YARD_INNER_RIGHT_2, 24, 12);
-      points[3] = PointMotor(POINT_YARD_OUTER_RIGHT_2, 24, 12);
+    //Right hand board. Bit of everything points
+      points[0] = PointMotor(YORK_SIDING, 24, 12); //0010 -- 2
+      points[1] = PointMotor(VIADUCT_CROSSOVEER_YORK, 24, 12); //0011 -- 3
+      points[2] = PointMotor(VIADUCT_CROSSOVER_LEEDS, 24, 12); //0100 -- 4
+      points[3] = PointMotor(LEEDS_SIDING_POINTS_B, 24, 12); //0101 -- 5
+      points[4] = PointMotor(LEEDS_SIDING_POINTS_C, 24, 12); //0110 -- 6
       break;
-      
+
     case B110000:    
-      points[0] = PointMotor(POINT_YARD_INNER_LEFT_1, 24, 12);
-      points[1] = PointMotor(POINT_YARD_OUTER_LEFT_1, 24, 12);
-      points[2] = PointMotor(POINT_YARD_INNER_LEFT_2, 24, 12);
-      points[3] = PointMotor(POINT_YARD_OUTER_LEFT_2, 24, 12);  
+    //Unused
+      //points[0] = PointMotor(POINT_YARD_INNER_LEFT_1, 24, 12);
+      //points[1] = PointMotor(POINT_YARD_OUTER_LEFT_1, 24, 12);
+      //points[2] = PointMotor(POINT_YARD_INNER_LEFT_2, 24, 12);
+      //points[3] = PointMotor(POINT_YARD_OUTER_LEFT_2, 24, 12);  
       break;
   }
 
