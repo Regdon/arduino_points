@@ -2,8 +2,8 @@
 #include <Servo.h>
 
 //Settings
-const int CODE_VERSION = 7;
-const char CODE_VERSION_DATE[] = "2025-04-23";
+const int CODE_VERSION = 8;
+const char CODE_VERSION_DATE[] = "2025-06-11";
 int node_id = 0;
 const int TEST_MODE = 0;
 
@@ -179,7 +179,7 @@ void setup() {
     //Right hand board. Bit of everything points
       points[0] = PointMotor(YORK_SIDING, 24, 12); //0010 -- 2
       points[1] = PointMotor(VIADUCT_CROSSOVEER_YORK, 24, 12); //0011 -- 3
-      points[2] = PointMotor(VIADUCT_CROSSOVER_LEEDS, 24, 12); //0100 -- 4
+      points[2] = PointMotor(VIADUCT_CROSSOVER_LEEDS, 24, 6); //0100 -- 4 -- Extended arm, reduced throw angle
       points[3] = PointMotor(LEEDS_SIDING_POINTS_B, 24, 12); //0101 -- 5
       points[4] = PointMotor(LEEDS_SIDING_POINTS_C, 24, 12); //0110 -- 6
       break;
