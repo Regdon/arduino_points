@@ -2,8 +2,8 @@
 #include <Servo.h>
 
 //Settings
-const int CODE_VERSION = 8;
-const char CODE_VERSION_DATE[] = "2025-06-11";
+const int CODE_VERSION = 9;
+const char CODE_VERSION_DATE[] = "2025-07-13";
 int node_id = 0;
 const int TEST_MODE = 0;
 
@@ -157,8 +157,8 @@ void setup() {
   switch (node_id) {
     case B000000:
     //Right hand board. Leeds end points
-      points[0] = PointMotor(LEEDS_OUTER_LOOP_POINTS, 24, 12); //0010 -- 2
-      points[1] = PointMotor(LEEDS_FACING_CROSSOVER_INNER_POINT, 24, 12); //0011 -- 3
+      points[0] = PointMotor(LEEDS_OUTER_LOOP_POINTS, 24, 12, -1); //0010 -- 2 -- Reversed
+      points[1] = PointMotor(LEEDS_FACING_CROSSOVER_INNER_POINT, 24, 12, -1); //0011 -- 3 -- Reversed
       points[2] = PointMotor(LEEDS_FACING_CROSSOVER_OUTER_POINT, 24, 12); //0100 -- 4
       points[3] = PointMotor(LEEDS_TRAILING_CROSSOVER_OUTER_POINT, 24, 12); //0101 -- 5
       points[4] = PointMotor(LEEDS_TRAILING_CROSSOVER_INNER_POINT, 24, 12); //0110 -- 6
@@ -177,11 +177,11 @@ void setup() {
       
     case B100000:
     //Right hand board. Bit of everything points
-      points[0] = PointMotor(YORK_SIDING, 24, 12); //0010 -- 2
-      points[1] = PointMotor(VIADUCT_CROSSOVEER_YORK, 24, 12); //0011 -- 3
-      points[2] = PointMotor(VIADUCT_CROSSOVER_LEEDS, 24, 6); //0100 -- 4 -- Extended arm, reduced throw angle
+      points[0] = PointMotor(YORK_SIDING, 24, 12, -1); //0010 -- 2 -- Reversed
+      points[1] = PointMotor(VIADUCT_CROSSOVEER_YORK, 24, 12, -1); //0011 -- 3 -- Reversed
+      points[2] = PointMotor(VIADUCT_CROSSOVER_LEEDS, 24, 6, -1); //0100 -- 4 -- Extended arm, reduced throw angle -- Reversed
       points[3] = PointMotor(LEEDS_SIDING_POINTS_B, 24, 12); //0101 -- 5
-      points[4] = PointMotor(LEEDS_SIDING_POINTS_C, 24, 12); //0110 -- 6
+      points[4] = PointMotor(LEEDS_SIDING_POINTS_C, 24, 12, -1); //0110 -- 6 -- Reversed
       break;
 
     case B110000:    
